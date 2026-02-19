@@ -35,7 +35,14 @@ app.use(function (req, res, next) {
   next();
 });
 
-// Pour les formulaires
+// Pour les formulaires (URL ENCODED, ce sont des formulaires classiques) et 
+// pour les données JSON (Content-Type: application/json)
+// si on avait des formulaires avec des fichiers à uploader,
+// il vaudrait mieux utiliser le module npm multer à la place de body-parser
+// et ça ne change pas énormément le code dans les routes, juste un peu 
+// pour récupérer les fichier et les fichiers. Ces formulaires avec fichiers 
+// s'appellent des formulaires multipart/form-data, et body-parser ne gère pas
+// ce type de formulaire, alors que multer le gère très bien.
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 

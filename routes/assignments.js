@@ -23,7 +23,7 @@ function getAssignment(req, res){
     // ca ressemble au route.snapshot.params en Angular
     let assignmentId = req.params.id;
 
-    Assignment.findOne({id: assignmentId}, (err, assignment) =>{
+    Assignment.findById(assignmentId, (err, assignment) =>{
         if(err){res.send(err)}
         res.json(assignment);
     })
@@ -60,7 +60,7 @@ function updateAssignment(req, res) {
     console.log("UPDATE recu assignment : ");
     console.log(req.body);
 
-    
+
     Assignment.findByIdAndUpdate(req.body._id, req.body, {new: true}, (err, assignment) => {
         if (err) {
             console.log(err);
@@ -77,14 +77,18 @@ function updateAssignment(req, res) {
 // suppression d'un assignment (DELETE)
 function deleteAssignment(req, res) {
 
-    Assignment.findByIdAndRemove(req.params.id, (err, assignment) => {
-        if (err) {
-            res.send(err);
-        }
-        res.json({message: `${assignment.nom} deleted`});
-    })
+    try {
+        console.log("DELETE recu assignment id : " + req.params.id);
+         Assignment.findByIdAndRemove(req.params.id, (err, assignment) => {
+            if (err) {
+                res.send(err);
+            }
+            res.json({message: `${assignment.nom} deleted`});
+        });
+    } catch (err) {
+        console.log("Error in deleteAssignment: ", err);
+        res.status(500).send('Error deleting assignment');
+    }
 }
-
-
 
 module.exports = { getAssignments, postAssignment, getAssignment, updateAssignment, deleteAssignment };
