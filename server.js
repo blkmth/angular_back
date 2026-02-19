@@ -42,19 +42,17 @@ app.use(bodyParser.json());
 let port = process.env.PORT || 8010;
 
 // les routes
-const prefix = '/api';
+const prefix = '/api';  // /api/assignments GET POST PUT
 
 app.route(prefix + '/assignments')
-  .get(assignment.getAssignments);
+  .get(assignment.getAssignments)
+  .post(assignment.postAssignment)
+  .put(assignment.updateAssignment);
 
 app.route(prefix + '/assignments/:id')
   .get(assignment.getAssignment)
   .delete(assignment.deleteAssignment);
 
-
-app.route(prefix + '/assignments')
-  .post(assignment.postAssignment)
-  .put(assignment.updateAssignment);
 
 // On démarre le serveur
 app.listen(port, "0.0.0.0");

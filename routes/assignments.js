@@ -7,12 +7,20 @@ function getAssignments(req, res){
             res.send(err)
         }
 
+        // res sert à renvoyer la réponse au client, ici le navigateur Angular
+        // assignment est transformé en JSON et envoyé dans le corps de la 
+        // réponse HTTP
         res.send(assignments);
     });
 }
 
 // Récupérer un assignment par son id (GET)
 function getAssignment(req, res){
+    // req = la requete HTTP qui contient des infos sur la requete du client
+    // c'est envoyé par le navigateur Angular, et on peut y trouver des infos 
+    // comme les paramètres de l'URL, le corps de la requete, etc
+    // req.params = l'id qui est dans l'URL, défini par :id dans la route
+    // ca ressemble au route.snapshot.params en Angular
     let assignmentId = req.params.id;
 
     Assignment.findOne({id: assignmentId}, (err, assignment) =>{
@@ -24,6 +32,11 @@ function getAssignment(req, res){
 // Ajout d'un assignment (POST)
 function postAssignment(req, res){
     let assignment = new Assignment();
+
+    // req.body contient les données envoyées par le client 
+    // dans le corps de la requete HTTP
+    // dans notre cas, ce sont les données d'un assignment à ajouter, 
+    // envoyées par le formulaire Angular
     assignment.id = req.body.id;
     assignment.nom = req.body.nom;
     assignment.dateDeRendu = req.body.dateDeRendu;
@@ -32,6 +45,8 @@ function postAssignment(req, res){
     console.log("POST assignment reçu :");
     console.log(assignment)
 
+    // fait l'insertion dans la base de données, et ensuite envoie une 
+    // réponse au client
     assignment.save( (err) => {
         if(err){
             res.send('cant post assignment ', err);
@@ -44,6 +59,8 @@ function postAssignment(req, res){
 function updateAssignment(req, res) {
     console.log("UPDATE recu assignment : ");
     console.log(req.body);
+
+    
     Assignment.findByIdAndUpdate(req.body._id, req.body, {new: true}, (err, assignment) => {
         if (err) {
             console.log(err);
