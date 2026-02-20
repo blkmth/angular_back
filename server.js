@@ -71,8 +71,10 @@ app.route(prefix + '/assignments/:id')
 
 
 // On démarre le serveur
-app.listen(port, "0.0.0.0");
-console.log('Serveur démarré sur le port : ' + port);
+app.listen(port, () => {
+  console.log('Serveur démarré sur le port : ' + port);
+});
+
 
 module.exports = app;
 
