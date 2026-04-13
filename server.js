@@ -26,17 +26,8 @@ if (!uri) {
 const options = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  useFindAndModify:false
+  useFindAndModify: false
 };
-
-mongoose.connect(uri, options)
-  .then(() => {
-    console.log("Connecté à la base MongoDB assignments dans le cloud !");
-    console.log(`vérifiez with http://localhost:${port}/api/assignments que cela fonctionne`)
-    },
-    err => {
-      console.log('Erreur de connexion: ', err);
-    });
 
 // Pour accepter les connexions cross-domain (CORS)
 app.use(function (req, res, next) {
@@ -48,13 +39,7 @@ app.use(function (req, res, next) {
 
 // Pour les formulaires (URL ENCODED, ce sont des formulaires classiques) et 
 // pour les données JSON (Content-Type: application/json)
-// si on avait des formulaires avec des fichiers à uploader,
-// il vaudrait mieux utiliser le module npm multer à la place de body-parser
-// et ça ne change pas énormément le code dans les routes, juste un peu 
-// pour récupérer les fichier et les fichiers. Ces formulaires avec fichiers 
-// s'appellent des formulaires multipart/form-data, et body-parser ne gère pas
-// ce type de formulaire, alors que multer le gère très bien.
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // les routes
@@ -69,12 +54,20 @@ app.route(prefix + '/assignments/:id')
   .get(assignment.getAssignment)
   .delete(assignment.deleteAssignment);
 
+mongoose.connect(uri, options)
+  .then(() => {
+    console.log("Connecté à la base MongoDB assignments dans le cloud !");
+    console.log(`Vérifiez avec http://localhost:${port}/api/assignments que cela fonctionne`);
 
-// On démarre le serveur
-app.listen(port, () => {
-  console.log('Serveur démarré sur le port : ' + port);
-});
-
+    // On démarre le serveur seulement après la connexion réussie à la base
+    app.listen(port, () => {
+      console.log('Serveur démarré sur le port : ' + port);
+    });
+  })
+  .catch(err => {
+    console.error('Erreur de connexion MongoDB : ', err);
+    process.exit(1); // On arrête le processus si la connexion échoue
+  });
 
 module.exports = app;
 
