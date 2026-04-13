@@ -1,4 +1,5 @@
-let Assignment = require("../model/assignment");
+// Le { } est essentiel — on extrait la propriété Assignment de l'objet exporté
+const { Assignment } = require('../model/assignment');
 
 // Récupérer tous les assignments (GET)
 function getAssignmentsSansPagination(req, res) {
@@ -59,9 +60,10 @@ function postAssignment(req, res) {
   // dans notre cas, ce sont les données d'un assignment à ajouter,
   // envoyées par le formulaire Angular
   assignment.id = req.body.id;
-  assignment.nom = req.body.nom;
-  assignment.dateDeRendu = req.body.dateDeRendu;
+  assignment.Nom = req.body.Nom || req.body.nom; // Supporte les deux par sécurité
+  assignment.dateRendu = req.body.dateRendu || req.body.dateDeRendu;
   assignment.rendu = req.body.rendu;
+  assignment.matieres = req.body.matieres || req.body.matiere;
 
   console.log("POST assignment reçu :");
   console.log(assignment);

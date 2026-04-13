@@ -1,74 +1,56 @@
-let express = require('express');
-let app = express();
-let bodyParser = require('body-parser');
-let assignment = require('./routes/assignments');
-
-// Pour externaliser la configuration (URI de connexion à la base, 
-// port du serveur, etc), et on peut aussi utiliser des variables 
-// d'environnement, pour le PORT etc.
+// server.js
 require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
-let port = process.env.PORT || 8010;
+// ── Imports des routes et middlewares ──────────────────────────────
+const assignmentsRoutes = require('./routes/assignments');
+const authRoutes = require('./routes/auth');         // NOUVEAU
+const { verifyToken, isAdmin } = require('./middleware/auth'); // NOUVEAU
 
-let mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
-//mongoose.set('debug', true);
+const app = express();
 
-// remplacer toute cette chaine par l'URI de connexion à votre propre base dans le cloud s
-//const uri = 'mongodb+srv://...';
-const uri = process.env.MONGODB_URI;
-
-if (!uri) {
-  console.error('MONGODB_URI manquant. Créez un fichier .env ou définissez la variable d\'environnement.');
+// ── Connexion MongoDB ──────────────────────────────────────────────
+if (!process.env.MONGODB_URI) {
+  console.error('❌ MONGODB_URI manquant dans .env');
   process.exit(1);
 }
-
-const options = {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  useFindAndModify: false
-};
+});
+mongoose.connection.once('open', () => console.log('✅ MongoDB connecté'));
 
-// Pour accepter les connexions cross-domain (CORS)
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+// ── Middlewares globaux ────────────────────────────────────────────
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Authorization ajouté !
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
-
-// Pour les formulaires (URL ENCODED, ce sont des formulaires classiques) et 
-// pour les données JSON (Content-Type: application/json)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// les routes
-const prefix = '/api';  // /api/assignments GET POST PUT
+// ── Routes publiques (pas besoin d'être connecté) ──────────────────
+app.get('/api/assignments', assignmentsRoutes.getAssignments);
+app.get('/api/assignments/:id', assignmentsRoutes.getAssignment);
+app.post('/api/assignments', verifyToken, assignmentsRoutes.postAssignment);
 
-app.route(prefix + '/assignments')
-  .get(assignment.getAssignments)
-  .post(assignment.postAssignment)
-  .put(assignment.updateAssignment);
+// Routes d'authentification — toujours publiques
+app.post('/api/auth/register', authRoutes.register);
+app.post('/api/auth/login', authRoutes.login);
 
-app.route(prefix + '/assignments/:id')
-  .get(assignment.getAssignment)
-  .delete(assignment.deleteAssignment);
+// Route pour vérifier son token (utile côté Angular au démarrage)
+app.get('/api/auth/me', verifyToken, (req, res) => {
+  res.json({ user: req.user });
+});
 
-mongoose.connect(uri, options)
-  .then(() => {
-    console.log("Connecté à la base MongoDB assignments dans le cloud !");
-    console.log(`Vérifiez avec http://localhost:${port}/api/assignments que cela fonctionne`);
+// ── Routes protégées (nécessitent d'être admin) ────────────────────
+app.put('/api/assignments', isAdmin, assignmentsRoutes.updateAssignment);
+app.delete('/api/assignments/:id', isAdmin, assignmentsRoutes.deleteAssignment);
 
-    // On démarre le serveur seulement après la connexion réussie à la base
-    app.listen(port, () => {
-      console.log('Serveur démarré sur le port : ' + port);
-    });
-  })
-  .catch(err => {
-    console.error('Erreur de connexion MongoDB : ', err);
-    process.exit(1); // On arrête le processus si la connexion échoue
-  });
-
-module.exports = app;
-
-
+// ── Démarrage du serveur ───────────────────────────────────────────
+const PORT = process.env.PORT || 8010;
+app.listen(PORT, () => console.log(`🚀 Serveur lancé sur le port ${PORT}`));
