@@ -10,7 +10,7 @@ let AssignmentSchema = Schema({
 });
 
 // Pour la pagination, on ajoute le plugin mongoose-aggregate-paginate-v2 
-// au schéma Mongoose
+// au schéma Mongoose test de push
 AssignmentSchema.plugin(aggregatePaginate);
 
 // C'est à travers ce modèle Mongoose qu'on pourra faire le CRUD
