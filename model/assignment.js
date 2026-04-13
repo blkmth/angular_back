@@ -63,14 +63,9 @@ let assignmentSchema = new Schema({
     remarque: { type: String, default: '' },
 });
 
-<<<<<<< HEAD
 // Pour la pagination, on ajoute le plugin mongoose-aggregate-paginate-v2 
 // au schéma Mongoose test de push
 AssignmentSchema.plugin(aggregatePaginate);
-=======
-// plugin de pagination 
-assignmentSchema.plugin(mongooseAggregatePaginate);
->>>>>>> 301d0ca ( modification de app.js ajout nouvelles entrées pour enregistrement ))
 
 // export de la liste des matieres pour les routes 
 module.exports.MATIERES = MATIERES;
