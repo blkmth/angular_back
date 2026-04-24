@@ -42,6 +42,13 @@ app.post('/api/assignments', verifyToken, assignmentsRoutes.postAssignment);
 app.post('/api/auth/register', authRoutes.register);
 app.post('/api/auth/login', authRoutes.login);
 
+// ── Route pour récupérer la liste des matières
+const { MATIERES } = require('./model/assignment');
+app.get('/api/matieres', (req, res) => {
+  res.json(MATIERES);
+});
+
+
 // Route pour vérifier son token (utile côté Angular au démarrage)
 app.get('/api/auth/me', verifyToken, (req, res) => {
   res.json({ user: req.user });

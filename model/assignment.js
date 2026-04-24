@@ -39,13 +39,13 @@ const MATIERES = [
 let assignmentSchema = new Schema({
     id: { type: Number },
 
-    Nom: { type: String }, // Adapté : Nom (Majuscule)
+    nom: { type: String }, // Adapté : Nom (Majuscule)
 
-    dateRendu: { type: Date, required: true }, // Adapté : dateRendu
+    dateDeRendu: { type: Date, required: true }, // Adapté : dateRendu
 
     rendu: { type: Boolean, default: false },
 
-    matieres: { // Adapté : matieres (Pluriel)
+    matiere: { // Adapté : matieres (Pluriel)
         type: String,
         default: 'Angular'
     },
@@ -65,6 +65,8 @@ let assignmentSchema = new Schema({
 // Pour la pagination, on ajoute le plugin mongoose-aggregate-paginate-v2 
 // au schéma Mongoose
 assignmentSchema.plugin(mongooseAggregatePaginate);
+
+
 
 // export de la liste des matieres pour les routes 
 module.exports.MATIERES = MATIERES;
