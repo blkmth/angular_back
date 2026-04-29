@@ -1,6 +1,7 @@
 // server.js
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
@@ -9,8 +10,10 @@ const assignmentsRoutes = require('./routes/assignments');
 const authRoutes = require('./routes/auth');         // NOUVEAU
 const { verifyToken, isAdmin } = require('./middleware/auth'); // NOUVEAU
 
+
 const app = express();
 
+app.use(cors());
 // ── Connexion MongoDB ──────────────────────────────────────────────
 if (!process.env.MONGODB_URI) {
   console.error('❌ MONGODB_URI manquant dans .env');
@@ -34,8 +37,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // ── Routes publiques (pas besoin d'être connecté) ──────────────────
-app.get('/api/assignments', assignmentsRoutes.getAssignments);
-app.get('/api/assignments/:id', assignmentsRoutes.getAssignment);
+//app.get('/api/assignments', assignmentsRoutes.getAssignments);
+app.get('/api/assignments', verifyToken, assignmentsRoutes.getAssignmentsPagine);
+app.get('/api/assignments/:id', verifyToken, assignmentsRoutes.getAssignment);
 app.post('/api/assignments', verifyToken, assignmentsRoutes.postAssignment);
 
 // Routes d'authentification — toujours publiques
@@ -48,9 +52,15 @@ app.get('/api/auth/me', verifyToken, (req, res) => {
 });
 
 // ── Routes protégées (nécessitent d'être admin) ────────────────────
-app.put('/api/assignments', isAdmin, assignmentsRoutes.updateAssignment);
-app.delete('/api/assignments/:id', isAdmin, assignmentsRoutes.deleteAssignment);
+
+app.put('/api/assignments', verifyToken, isAdmin, assignmentsRoutes.updateAssignment);
+app.delete('/api/assignments/:id', verifyToken, isAdmin, assignmentsRoutes.deleteAssignment);
+
+// Route pour récupérer les matières (peut être publique ou protégée selon votre choix)
+app.get('/api/matieres', assignmentsRoutes.getMatieres);
 
 // ── Démarrage du serveur ───────────────────────────────────────────
 const PORT = process.env.PORT || 8010;
 app.listen(PORT, () => console.log(`🚀 Serveur lancé sur le port ${PORT}`));
+
+//router.get('/matieres', getMatieres);
