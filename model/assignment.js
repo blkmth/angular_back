@@ -34,8 +34,11 @@ let assignmentSchema = new Schema({
   dateDeRendu: Date, // ⚠️ IMPORTANT
 
   rendu: Boolean,
-
-  note: Number,
+  note: {
+    type: Number,
+    min: 0,
+    max: 20
+  },
   remarques: String,
 
   imageMatiere: String,

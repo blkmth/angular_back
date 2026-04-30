@@ -72,3 +72,10 @@ exports.login = async (req, res) => {
         res.status(500).json({ message: 'Error logging in' });
     }
 }
+
+// logout: endpoint simple à appeler côté front pour clore la session client
+exports.logout = async (req, res) => {
+    // Si vous utilisez des cookies, ici on pourrait clearCookie
+    // Avec JWT en localStorage, le frontend supprime simplement le token.
+    res.status(200).json({ message: 'Logged out' });
+}

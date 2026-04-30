@@ -84,7 +84,12 @@ function postAssignment(req, res) {
   assignment.dateDeRendu = req.body.dateDeRendu;
   assignment.rendu = req.body.rendu;
 
-  assignment.note = req.body.note;
+  // validation: note ne doit pas dépasser 20
+  const noteValue = req.body.note !== undefined ? Number(req.body.note) : undefined;
+  if (!isNaN(noteValue) && noteValue > 20) {
+    return res.status(400).json({ message: 'La note ne peut pas dépasser 20' });
+  }
+  assignment.note = noteValue;
   assignment.remarques = req.body.remarques;
 
   assignment.imageMatiere = req.body.imageMatiere;
@@ -103,6 +108,14 @@ function postAssignment(req, res) {
 
 // ✅ UPDATE
 function updateAssignment(req, res) {
+  // validation si une note est fournie
+  if (req.body.note !== undefined) {
+    const noteValue = Number(req.body.note);
+    if (!isNaN(noteValue) && noteValue > 20) {
+      return res.status(400).json({ message: 'La note ne peut pas dépasser 20' });
+    }
+  }
+
   Assignment.findByIdAndUpdate(
     req.body._id,
     req.body,
