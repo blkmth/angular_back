@@ -94,7 +94,7 @@ function postAssignment(req, res) {
 
   assignment.imageMatiere = req.body.imageMatiere;
   assignment.auteur = req.body.auteur;
-  
+
   assignment.save((err, saved) => {
     if (err) return res.status(500).json(err);
 
@@ -116,13 +116,16 @@ function updateAssignment(req, res) {
     }
   }
 
+  // 🔥 On extrait l'ID et on nettoie le body pour éviter l'erreur "immutable field _id"
+  const { _id, ...updateData } = req.body;
+
   Assignment.findByIdAndUpdate(
-    req.body._id,
-    req.body,
+    _id,
+    updateData,
     { new: true }
   )
-  .then(() => res.json({ message: "updated" }))
-  .catch(err => res.status(500).json(err));
+    .then(() => res.json({ message: "updated" }))
+    .catch(err => res.status(500).json(err));
 }
 
 
@@ -140,7 +143,7 @@ function getMatieres(req, res) {
   res.json(MATIERES);
 }
 
-function getAssignmentsPagine(req, res) { 
+function getAssignmentsPagine(req, res) {
   let page = parseInt(req.query.page || 1);
   let limit = parseInt(req.query.limit || 10);
   let search = req.query.search || '';
@@ -158,7 +161,7 @@ function getAssignmentsPagine(req, res) {
       nom: { $regex: search, $options: 'i' }
     };
   }
-  
+
 
   Assignment.aggregatePaginate(
     Assignment.aggregate([
